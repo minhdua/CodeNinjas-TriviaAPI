@@ -104,7 +104,7 @@ def create_app(test_config=ProductionConfig()):
             'success': True,
             'question': question_id,
             'total_questions': len(Question.query.all()),
-            'current_category': question.category.id
+            'current_category': question.category
         })
 
     @app.route('/questions', methods=['POST'])

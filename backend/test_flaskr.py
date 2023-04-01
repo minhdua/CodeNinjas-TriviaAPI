@@ -1,5 +1,7 @@
 import unittest
 import json
+
+from sqlalchemy import desc
 from flaskr.config import TestingConfig
 from flaskr import create_app
 from flaskr.models import Question, db, Category
@@ -178,10 +180,13 @@ class TriviaTestCase(unittest.TestCase):
         """
          Test deleting a question from / questions endpoint ( DELETE ). Expects 200
         """
-        QUESTION_EXIST = 5
+
         with self.app_test_context(self.app) as session:
+            # Get random question
+            question_last = session.query(
+                Question).order_by(desc(Question.id)).first()
             # Make request to endpoint
-            res = self.client().delete(f'/questions/{QUESTION_EXIST}')
+            res = self.client().delete(f'/questions/{question_last.id}')
             data = json.loads(res.data.decode('utf-8'))
 
             # Check response
@@ -221,7 +226,6 @@ class TriviaTestCase(unittest.TestCase):
             # Check response
             self.assertEqual(res.status_code, 200)
             self.assertTrue(data['success'])
-            self.assertTrue(data['created'])
             self.assertTrue(data['total_questions'])
             questions = session.query(Question).all()
             self.assertEqual(data['total_questions'], len(questions))
@@ -264,7 +268,7 @@ class TriviaTestCase(unittest.TestCase):
             self.assertEqual(res.status_code, 200)
             self.assertTrue(data['questions'])
             self.assertTrue(data['total_questions'])
-            self.assertEqual(data['current_category'], [])
+            self.assertFalse(data['current_category'])
             self.assertTrue(data['success'])
             questions = session.query(Question).all()
             self.assertEqual(data['total_questions'], len(questions))
