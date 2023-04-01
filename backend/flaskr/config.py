@@ -7,11 +7,7 @@ load_dotenv(os.path.join(basedir, '.env'))
 
 def get_database_path(mode):
     """
-     Get the path to the database. This is based on the environment variables and can be overridden by passing a different mode
-
-     @param mode - The mode to look for
-
-     @return The path to the
+    Get database path
     """
     host = os.environ.get(f'{mode}_HOST', "localhost")
     port = os.environ.get(f'{mode}_PORT', "5432")

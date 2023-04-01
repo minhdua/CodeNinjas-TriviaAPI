@@ -9,13 +9,11 @@ load_dotenv(os.path.join(basedir, '.env'))
 
 db = SQLAlchemy()
 
-"""
-setup_db(app)
-    binds a flask application and a SQLAlchemy service
-"""
-
 
 def setup_db(app, config):
+    """
+    Setup database
+    """
     app.config.from_object(config)
     db.app = app
     db.init_app(app)
@@ -25,11 +23,11 @@ def setup_db(app, config):
 
 """
 Question
-
 """
 
 
 class Question(db.Model):
+
     __tablename__ = 'questions'
 
     id = Column(Integer, primary_key=True)
@@ -67,7 +65,6 @@ class Question(db.Model):
 
 """
 Category
-
 """
 
 
