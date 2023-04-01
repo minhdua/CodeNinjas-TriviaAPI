@@ -142,17 +142,17 @@ INSERT INTO public.questions (id, question, answer, difficulty, category) VALUES
 (20, 'What is the heaviest organ in the human body?', 'The Liver', 4, 1),
 (21, 'Who discovered penicillin?', 'Alexander Fleming', 3, 1),
 (22, 'Hematology is a branch of medicine involving the study of what?', 'Blood', 4, 1),
-(23, 'Which dung beetle was worshipped by the ancient Egyptians?', 'Scarab', 4, 4)
+(23, 'Which dung beetle was worshipped by the ancient Egyptians?', 'Scarab', 4, 4),
 (24, 'What is the largest planet in our solar system?', 'Jupiter', 3, 1),
--- (25, 'What is the smallest country in the world?', 'Vatican City', 2, 3),
--- (26, 'Who wrote the novel "1984"?', 'George Orwell', 3, 4),
--- (27, 'What is the world''s longest river?', 'Nile', 3, 3),
--- (28, 'Who painted the famous work "The Starry Night"?', 'Vincent van Gogh', 4, 2),
--- (29, 'What is the name of the first man to walk on the moon?', 'Neil Armstrong', 3, 1),
--- (30, 'What is the highest mountain in North America?', 'Denali (Mount McKinley)', 4, 3),
--- (31, 'What is the capital of Australia?', 'Canberra', 2, 3),
--- (32, 'Who wrote the famous novel "Pride and Prejudice"?', 'Jane Austen', 2, 4),
--- (33, 'What is the fastest land animal?', 'Cheetah', 3, 1);
+(25, 'What is the smallest country in the world?', 'Vatican City', 2, 3),
+(26, 'Who wrote the novel "1984"?', 'George Orwell', 3, 4),
+(27, 'What is the world''s longest river?', 'Nile', 3, 3),
+(28, 'Who painted the famous work "The Starry Night"?', 'Vincent van Gogh', 4, 2),
+(29, 'What is the name of the first man to walk on the moon?', 'Neil Armstrong', 3, 1),
+(30, 'What is the highest mountain in North America?', 'Denali (Mount McKinley)', 4, 3),
+(31, 'What is the capital of Australia?', 'Canberra', 2, 3),
+(32, 'Who wrote the famous novel "Pride and Prejudice"?', 'Jane Austen', 2, 4),
+(33, 'What is the fastest land animal?', 'Cheetah', 3, 1);
 \.
 
 

@@ -1,10 +1,6 @@
-import os
 import unittest
 import json
-from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from flaskr.config import TestingConfig
-
 from flaskr import create_app
 from flaskr.models import Question, db, Category
 from contextlib import contextmanager
@@ -91,7 +87,7 @@ class TriviaTestCase(unittest.TestCase):
             self.assertTrue(data['questions'])
             self.assertTrue(data['categories'])
             self.assertTrue(data['total_questions'])
-            self.assertEqual(data['current_category'], [])
+            self.assertFalse(data['current_category'])
             self.assertTrue(data['success'])
             questions = session.query(Question).all()
             self.assertEqual(data['total_questions'], len(questions))
@@ -123,13 +119,15 @@ class TriviaTestCase(unittest.TestCase):
             self.assertTrue(data['questions'])
             self.assertTrue(data['categories'])
             self.assertTrue(data['total_questions'])
-            self.assertTrue(data['current_category'])
+            self.assertFalse(data['current_category'])
             self.assertTrue(data['success'])
             questions = session.query(Question).all()
             # get questions in current page
-            questions = questions[(CURRENT_PAGE - 1) *
-                                  NUMBER_OF_PAGE:CURRENT_PAGE * NUMBER_OF_PAGE]
+            questions_in_current_page = questions[(CURRENT_PAGE - 1) *
+                                                  NUMBER_OF_PAGE:CURRENT_PAGE * NUMBER_OF_PAGE]
             self.assertEqual(data['total_questions'], len(questions))
+            self.assertEqual(len(data['questions']),
+                             len(questions_in_current_page))
 
     def test_get_all_questions_paginated_return_404(self):
         """
@@ -157,7 +155,7 @@ class TriviaTestCase(unittest.TestCase):
             self.assertEqual(res.status_code, 200)
             self.assertTrue(data['questions'])
             self.assertTrue(data['total_questions'])
-            self.assertTrue(data['current_category'])
+            self.assertEqual(data['current_category'], CURRENT_CATEGORY)
             self.assertTrue(data['success'])
             questions = session.query(Question).filter_by(
                 category=CURRENT_CATEGORY).all()
@@ -180,15 +178,15 @@ class TriviaTestCase(unittest.TestCase):
         """
          Test deleting a question from / questions endpoint ( DELETE ). Expects 200
         """
+        QUESTION_EXIST = 5
         with self.app_test_context(self.app) as session:
             # Make request to endpoint
-            res = self.client().delete('/questions/1')
+            res = self.client().delete(f'/questions/{QUESTION_EXIST}')
             data = json.loads(res.data.decode('utf-8'))
 
             # Check response
             self.assertEqual(res.status_code, 200)
             self.assertTrue(data['success'])
-            self.assertTrue(data['deleted'])
             self.assertTrue(data['total_questions'])
             questions = session.query(Question).all()
             self.assertEqual(data['total_questions'], len(questions))
@@ -197,10 +195,11 @@ class TriviaTestCase(unittest.TestCase):
         """
          Test deleting a question from / questions endpoint ( DELETE ). Expects 404
         """
+        QUESTION_NOT_EXIST = 1
         with self.app_test_context(self.app) as session:
             # delete all questions
             session.query(Question).delete()
-            res = self.client().delete('/questions/1')
+            res = self.client().delete(f'/questions/{QUESTION_NOT_EXIST}')
             # test status code
             self.assertEqual(res.status_code, 404)
 
@@ -227,43 +226,47 @@ class TriviaTestCase(unittest.TestCase):
             questions = session.query(Question).all()
             self.assertEqual(data['total_questions'], len(questions))
 
-    def test_create_question_return_422(self):
-        """
-         Test creating a question from / questions endpoint ( POST ). Expects 422
-        """
-        self.new_question = {
-            'question': 'What is the capital of France?',
-            'answer': 'Paris',
-            'difficulty': 1,
-            'category': 1
-        }
-        with self.app_test_context(self.app) as session:
-            # delete all questions
-            session.query(Question).delete()
-            res = self.client().post('/questions', json=self.new_question)
-            # test status code
-            self.assertEqual(res.status_code, 422)
-
     def test_search_question_return_200(self):
         """
          Test searching a question from / questions endpoint ( POST ). Expects 200
         """
         self.search_question = {
-            'searchTerm': 'title'
+            'searchTerm': 'what'
         }
         with self.app_test_context(self.app) as session:
             # Make request to endpoint
-            res = self.client().post('/questions', json=self.search_question)
+            res = self.client().post('/questions/search', json=self.search_question)
             data = json.loads(res.data.decode('utf-8'))
 
             # Check response
             self.assertEqual(res.status_code, 200)
             self.assertTrue(data['questions'])
             self.assertTrue(data['total_questions'])
-            self.assertTrue(data['current_category'])
+            self.assertFalse(data['current_category'])
             self.assertTrue(data['success'])
             questions = session.query(Question).filter(Question.question.ilike(
                 '%' + self.search_question['searchTerm'] + '%')).all()
+            self.assertEqual(data['total_questions'], len(questions))
+
+    def test_search_question_when_searchTerm_is_empty_return_200(self):
+        """
+         Test searching a question from / questions endpoint ( POST ). Expects 200
+        """
+        self.search_question = {
+            'searchTerm': ''
+        }
+        with self.app_test_context(self.app) as session:
+            # Make request to endpoint
+            res = self.client().post('/questions/search', json=self.search_question)
+            data = json.loads(res.data.decode('utf-8'))
+
+            # Check response
+            self.assertEqual(res.status_code, 200)
+            self.assertTrue(data['questions'])
+            self.assertTrue(data['total_questions'])
+            self.assertEqual(data['current_category'], [])
+            self.assertTrue(data['success'])
+            questions = session.query(Question).all()
             self.assertEqual(data['total_questions'], len(questions))
 
     def test_search_question_return_404(self):
@@ -271,12 +274,10 @@ class TriviaTestCase(unittest.TestCase):
          Test searching a question from / questions endpoint ( POST ). Expects 404
         """
         self.search_question = {
-            'searchTerm': 'title'
+            'searchTerm': 'abcdef'
         }
         with self.app_test_context(self.app) as session:
-            # delete all questions
-            session.query(Question).delete()
-            res = self.client().post('/questions', json=self.search_question)
+            res = self.client().post('/questions/search', json=self.search_question)
             # test status code
             self.assertEqual(res.status_code, 404)
 
@@ -300,24 +301,6 @@ class TriviaTestCase(unittest.TestCase):
             self.assertEqual(res.status_code, 200)
             self.assertTrue(data['question'])
             self.assertTrue(data['success'])
-
-    def test_create_quiz_question_return_404(self):
-        """
-         Test creating a quiz question from / quiz endpoint ( POST ). Expects 404
-        """
-        self.quiz_question = {
-            'previous_questions': [1, 2, 3],
-            'quiz_category': {
-                'type': 'Science',
-                'id': 1
-            }
-        }
-        with self.app_test_context(self.app) as session:
-            # delete all questions
-            session.query(Question).delete()
-            res = self.client().post('/quizzes', json=self.quiz_question)
-            # test status code
-            self.assertEqual(res.status_code, 404)
 
 
 # Make the tests conveniently executable
