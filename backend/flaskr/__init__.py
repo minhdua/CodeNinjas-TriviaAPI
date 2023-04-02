@@ -79,12 +79,12 @@ def create_app(test_config=ProductionConfig()):
 
         categories = {
             category.id: category.type for category in Category.query.all()}
-
+        current_categories = list(set([q.category for q in selection])).sort()
         return jsonify({
             'success': True,
             'questions': current_questions,
             'total_questions': len(Question.query.all()),
-            'current_category': None,
+            'current_category': current_categories,
             'categories': categories
         })
 
@@ -125,10 +125,12 @@ def create_app(test_config=ProductionConfig()):
             question.insert()
             selection = Question.query.order_by(Question.id).all()
             questions = paginate(request, selection)
+            current_categories = list(
+                set([q.category for q in selection])).sort()
             return jsonify({
                 'success': True,
                 'questions': questions,
-                'current_category': None,
+                'current_category': current_categories,
                 'total_questions': len(Question.query.all())
             })
         except Exception:
@@ -149,11 +151,12 @@ def create_app(test_config=ProductionConfig()):
 
             if (len(current_questions) == 0):
                 abort(404)
-
+            current_categories = list(
+                set([q.category for q in selection])).sort()
             return jsonify({
                 'success': True,
                 'questions': current_questions,
-                'current_category': None,
+                'current_category': current_categories,
                 'total_questions': len(selection)
             })
 
@@ -242,6 +245,28 @@ def create_app(test_config=ProductionConfig()):
             'success': False,
             'error': 422,
             'message': 'unprocessable'
-        })
+        }), 422
+
+    @app.errorhandler(400)
+    def bad_request(error):
+        """
+        Error handler for 400
+        """
+        return jsonify({
+            'success': False,
+            'error': 400,
+            'message': 'bad request'
+        }), 400
+
+    @app.errorhandler(500)
+    def internal_server_error(error):
+        """
+        Error handler for 500
+        """
+        return jsonify({
+            'success': False,
+            'error': 500,
+            'message': 'internal server error'
+        }), 500
 
     return app

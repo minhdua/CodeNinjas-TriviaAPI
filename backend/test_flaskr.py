@@ -89,9 +89,11 @@ class TriviaTestCase(unittest.TestCase):
             self.assertTrue(data['questions'])
             self.assertTrue(data['categories'])
             self.assertTrue(data['total_questions'])
-            self.assertFalse(data['current_category'])
             self.assertTrue(data['success'])
             questions = session.query(Question).all()
+            current_categories = list(
+                set([q.category for q in questions])).sort()
+            self.assertEqual(data['current_category'], current_categories)
             self.assertEqual(data['total_questions'], len(questions))
 
     def test_get_all_questions_return_404(self):
@@ -121,9 +123,12 @@ class TriviaTestCase(unittest.TestCase):
             self.assertTrue(data['questions'])
             self.assertTrue(data['categories'])
             self.assertTrue(data['total_questions'])
-            self.assertFalse(data['current_category'])
             self.assertTrue(data['success'])
             questions = session.query(Question).all()
+            # dictinct categories sort asc
+            current_categories = list(
+                set([q.category for q in questions])).sort()
+            self.assertEqual(data['current_category'], current_categories)
             # get questions in current page
             questions_in_current_page = questions[(CURRENT_PAGE - 1) *
                                                   NUMBER_OF_PAGE:CURRENT_PAGE * NUMBER_OF_PAGE]
@@ -191,8 +196,8 @@ class TriviaTestCase(unittest.TestCase):
 
             # Check response
             self.assertEqual(res.status_code, 200)
-            self.assertTrue(data['success'])
             self.assertTrue(data['total_questions'])
+            self.assertTrue(data['success'])
             questions = session.query(Question).all()
             self.assertEqual(data['total_questions'], len(questions))
 
@@ -225,8 +230,8 @@ class TriviaTestCase(unittest.TestCase):
 
             # Check response
             self.assertEqual(res.status_code, 200)
-            self.assertTrue(data['success'])
             self.assertTrue(data['total_questions'])
+            self.assertTrue(data['success'])
             questions = session.query(Question).all()
             self.assertEqual(data['total_questions'], len(questions))
 
@@ -246,10 +251,12 @@ class TriviaTestCase(unittest.TestCase):
             self.assertEqual(res.status_code, 200)
             self.assertTrue(data['questions'])
             self.assertTrue(data['total_questions'])
-            self.assertFalse(data['current_category'])
             self.assertTrue(data['success'])
             questions = session.query(Question).filter(Question.question.ilike(
                 '%' + self.search_question['searchTerm'] + '%')).all()
+            current_category = list(
+                set([question.category for question in questions])).sort()
+            self.assertFalse(data['current_category'], current_category)
             self.assertEqual(data['total_questions'], len(questions))
 
     def test_search_question_when_searchTerm_is_empty_return_200(self):
@@ -268,9 +275,11 @@ class TriviaTestCase(unittest.TestCase):
             self.assertEqual(res.status_code, 200)
             self.assertTrue(data['questions'])
             self.assertTrue(data['total_questions'])
-            self.assertFalse(data['current_category'])
             self.assertTrue(data['success'])
             questions = session.query(Question).all()
+            current_categories = list(
+                set([question.category for question in questions])).sort()
+            self.assertFalse(data['current_category'], current_categories)
             self.assertEqual(data['total_questions'], len(questions))
 
     def test_search_question_return_404(self):
