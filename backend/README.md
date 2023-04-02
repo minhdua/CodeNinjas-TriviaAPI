@@ -372,6 +372,21 @@ You will need to provide detailed documentation of your API endpoints including 
 }
 ```
 
+```json
+{
+  "success": false,
+  "error": 400,
+  "message": "bad request"
+}
+```
+
+```json
+{
+  "success": false,
+  "error": 500,
+  "message": "internal server error"
+}
+```
 ## Testing
 
 Write at least one test for the success and at least one error behavior of each endpoint using the unittest library.

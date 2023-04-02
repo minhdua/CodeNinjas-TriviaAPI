@@ -174,7 +174,7 @@ def create_app(test_config=ProductionConfig()):
             abort(404)
 
         selection = Question.query.filter(
-            Question.category == str(category_id)).all()
+            Question.category == category_id).all()
         current_questions = paginate(request, selection)
 
         if (len(current_questions) == 0):
